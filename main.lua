@@ -1,5 +1,6 @@
 local inspect = require('inspect')
 local colors = require('src.colors')
+local object_category = require('src.object_category')
 
 function love.conf(t)
   t.title = "Sumo Bot Simulator"
@@ -19,19 +20,27 @@ function love.load()
   objects.main_robot.body.shape = love.physics.newRectangleShape(.1, .1)
   objects.main_robot.body.fixture = love.physics.newFixture(objects.main_robot.body.body, objects.main_robot.body.shape)
   objects.main_robot.body.fixture:setRestitution(0.9)
+  objects.main_robot.body.fixture:setCategory(object_category.robot)
+  objects.main_robot.body.fixture:setMask(object_category.world, object_category.robot)
   objects.main_robot.body.color = colors.red
 
   objects.main_robot.left_white_line_sensor = {}
-  objects.main_robot.left_white_line_sensor.body = love.physics.newBody(world, .56, .56)
+  objects.main_robot.left_white_line_sensor.body = love.physics.newBody(world, .56, .56, "dynamic")
   objects.main_robot.left_white_line_sensor.shape = love.physics.newCircleShape(.015)
   objects.main_robot.left_white_line_sensor.fixture = love.physics.newFixture(objects.main_robot.left_white_line_sensor.body, objects.main_robot.left_white_line_sensor.shape)
+  objects.main_robot.left_white_line_sensor.fixture:setRestitution(0.9)
+  objects.main_robot.left_white_line_sensor.fixture:setCategory(object_category.robot)
+  objects.main_robot.left_white_line_sensor.fixture:setMask(object_category.world, object_category.robot)
   objects.main_robot.left_white_line_sensor.color = colors.orange
   objects.main_robot.left_white_line_sensor_joint = love.physics.newDistanceJoint(objects.main_robot.body.body, objects.main_robot.left_white_line_sensor.body, .56, .56, .56, .56)
 
   objects.main_robot.right_white_line_sensor = {}
-  objects.main_robot.right_white_line_sensor.body = love.physics.newBody(world, .64, .56)
+  objects.main_robot.right_white_line_sensor.body = love.physics.newBody(world, .64, .56, "dynamic")
   objects.main_robot.right_white_line_sensor.shape = love.physics.newCircleShape(.015)
   objects.main_robot.right_white_line_sensor.fixture = love.physics.newFixture(objects.main_robot.right_white_line_sensor.body, objects.main_robot.right_white_line_sensor.shape)
+  objects.main_robot.right_white_line_sensor.fixture:setRestitution(0.9)
+  objects.main_robot.right_white_line_sensor.fixture:setCategory(object_category.robot)
+  objects.main_robot.right_white_line_sensor.fixture:setMask(object_category.world, object_category.robot)
   objects.main_robot.right_white_line_sensor.color = colors.yellow
   objects.main_robot.right_white_line_sensor_joint = love.physics.newDistanceJoint(objects.main_robot.body.body, objects.main_robot.right_white_line_sensor.body, .64, .56, .64, .56)
 
@@ -61,13 +70,47 @@ function love.load()
   objects.black_board.body = love.physics.newBody(world, .5, .5)
   objects.black_board.shape = love.physics.newCircleShape(.85)
   objects.black_board.fixture = love.physics.newFixture(objects.black_board.body, objects.black_board.shape)
+  objects.black_board.fixture:setCategory(object_category.world)
+  objects.black_board.fixture:setMask(object_category.world, object_category.robot)
   objects.black_board.color = colors.black
 
   objects.white_border = {}
   objects.white_border.body = love.physics.newBody(world, .5, .5)
   objects.white_border.shape = love.physics.newCircleShape(.95)
   objects.white_border.fixture = love.physics.newFixture(objects.white_border.body, objects.black_board.shape)
+  objects.white_border.fixture:setCategory(object_category.world)
+  objects.white_border.fixture:setMask(object_category.world, object_category.robot)
   objects.white_border.color = colors.white
+
+  objects.walls = {}
+
+  objects.walls.left = {}
+  objects.walls.left.body = love.physics.newBody(world, 0, .5)
+  objects.walls.left.shape = love.physics.newRectangleShape(.01, 1)
+  objects.walls.left.fixture = love.physics.newFixture(objects.walls.left.body, objects.walls.left.shape)
+  objects.walls.left.fixture:setCategory(object_category.walls)
+  objects.walls.left.color = colors.green
+
+  objects.walls.right = {}
+  objects.walls.right.body = love.physics.newBody(world, 1, .5)
+  objects.walls.right.shape = love.physics.newRectangleShape(.01, 1)
+  objects.walls.right.fixture = love.physics.newFixture(objects.walls.right.body, objects.walls.right.shape)
+  objects.walls.right.fixture:setCategory(object_category.walls)
+  objects.walls.right.color = colors.green
+
+  objects.walls.top = {}
+  objects.walls.top.body = love.physics.newBody(world, .5, 0)
+  objects.walls.top.shape = love.physics.newRectangleShape(1, .01)
+  objects.walls.top.fixture = love.physics.newFixture(objects.walls.top.body, objects.walls.top.shape)
+  objects.walls.top.fixture:setCategory(object_category.walls)
+  objects.walls.top.color = colors.green
+
+  objects.walls.bottom = {}
+  objects.walls.bottom.body = love.physics.newBody(world, .5, 1)
+  objects.walls.bottom.shape = love.physics.newRectangleShape(1, .01)
+  objects.walls.bottom.fixture = love.physics.newFixture(objects.walls.bottom.body, objects.walls.bottom.shape)
+  objects.walls.bottom.fixture:setCategory(object_category.walls)
+  objects.walls.bottom.color = colors.green
 
   love.graphics.setBackgroundColor(colors.blue())
   love.window.setMode(650, 650)
@@ -76,9 +119,9 @@ end
 function love.update(dt)
   world:update(dt)
 
-  -- if love.keyboard.isDown("right") then
-  --   objects.main_robot.body.body:applyForce(40, 10)
-  -- end
+  if love.keyboard.isDown("right") then
+    objects.main_robot.body.body:applyForce(1, 0)
+  end
 end
 
 local function rectangle_points(window_width, window_height, x1, y1, x2, y2, x3, y3, x4, y4)
@@ -108,6 +151,11 @@ function love.draw()
 
   draw_object(objects.white_border)
   draw_object(objects.black_board)
+
+  draw_object(objects.walls.left)
+  draw_object(objects.walls.right)
+  draw_object(objects.walls.top)
+  draw_object(objects.walls.bottom)
 
   draw_object(objects.main_robot.body)
   draw_object(objects.main_robot.left_white_line_sensor)

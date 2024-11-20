@@ -5,6 +5,7 @@ return {
   black = color(0, 0, 0),
   red = color(.6, 0, 0),
   white = color(1, 1, 1),
+  green = color(0, .6, 0),
 
   orange = color(1, .5, 0),
   yellow = color(1, .8, .5),
