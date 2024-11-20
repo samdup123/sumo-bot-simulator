@@ -9,15 +9,16 @@ end
 
 function love.load()
   love.physics.setMeter(64) --the height of a meter our worlds will be 64px
-  world = love.physics.newWorld(0, 9.81*64, true) --create a world for the bodies to exist in with horizontal gravity of 0 and vertical gravity of 9.81
+  world = love.physics.newWorld(0, 0, true) --create a world for the bodies to exist in with horizontal gravity of 0 and vertical gravity of 9.81
   objects = {}
 
   objects.main_robot = {}
 
   objects.main_robot.body = {}
-  objects.main_robot.body.body = love.physics.newBody(world, .6, .6)
+  objects.main_robot.body.body = love.physics.newBody(world, .6, .6, "dynamic")
   objects.main_robot.body.shape = love.physics.newRectangleShape(.1, .1)
   objects.main_robot.body.fixture = love.physics.newFixture(objects.main_robot.body.body, objects.main_robot.body.shape)
+  objects.main_robot.body.fixture:setRestitution(0.9)
   objects.main_robot.body.color = colors.red
 
   objects.main_robot.left_white_line_sensor = {}
@@ -25,12 +26,14 @@ function love.load()
   objects.main_robot.left_white_line_sensor.shape = love.physics.newCircleShape(.015)
   objects.main_robot.left_white_line_sensor.fixture = love.physics.newFixture(objects.main_robot.left_white_line_sensor.body, objects.main_robot.left_white_line_sensor.shape)
   objects.main_robot.left_white_line_sensor.color = colors.orange
+  objects.main_robot.left_white_line_sensor_joint = love.physics.newDistanceJoint(objects.main_robot.body.body, objects.main_robot.left_white_line_sensor.body, .56, .56, .56, .56)
 
   objects.main_robot.right_white_line_sensor = {}
   objects.main_robot.right_white_line_sensor.body = love.physics.newBody(world, .64, .56)
   objects.main_robot.right_white_line_sensor.shape = love.physics.newCircleShape(.015)
   objects.main_robot.right_white_line_sensor.fixture = love.physics.newFixture(objects.main_robot.right_white_line_sensor.body, objects.main_robot.right_white_line_sensor.shape)
   objects.main_robot.right_white_line_sensor.color = colors.yellow
+  objects.main_robot.right_white_line_sensor_joint = love.physics.newDistanceJoint(objects.main_robot.body.body, objects.main_robot.right_white_line_sensor.body, .64, .56, .64, .56)
 
   objects.opp_robot = {}
 
@@ -45,12 +48,14 @@ function love.load()
   objects.opp_robot.left_white_line_sensor.shape = love.physics.newCircleShape(.015)
   objects.opp_robot.left_white_line_sensor.fixture = love.physics.newFixture(objects.opp_robot.left_white_line_sensor.body, objects.opp_robot.left_white_line_sensor.shape)
   objects.opp_robot.left_white_line_sensor.color = colors.light_purple
+  objects.opp_robot.left_white_line_sensor_joint = love.physics.newDistanceJoint(objects.opp_robot.body.body, objects.opp_robot.left_white_line_sensor.body, .44, .44, .44, .44)
 
   objects.opp_robot.right_white_line_sensor = {}
   objects.opp_robot.right_white_line_sensor.body = love.physics.newBody(world, .36, .44)
   objects.opp_robot.right_white_line_sensor.shape = love.physics.newCircleShape(.015)
   objects.opp_robot.right_white_line_sensor.fixture = love.physics.newFixture(objects.opp_robot.right_white_line_sensor.body, objects.opp_robot.right_white_line_sensor.shape)
   objects.opp_robot.right_white_line_sensor.color = colors.pink
+  objects.opp_robot.right_white_line_sensor_joint = love.physics.newDistanceJoint(objects.opp_robot.body.body, objects.opp_robot.right_white_line_sensor.body, .36, .44, .36, .44)
 
   objects.black_board = {}
   objects.black_board.body = love.physics.newBody(world, .5, .5)
@@ -64,14 +69,16 @@ function love.load()
   objects.white_border.fixture = love.physics.newFixture(objects.white_border.body, objects.black_board.shape)
   objects.white_border.color = colors.white
 
-
-
   love.graphics.setBackgroundColor(colors.blue())
   love.window.setMode(650, 650)
 end
 
 function love.update(dt)
   world:update(dt)
+
+  -- if love.keyboard.isDown("right") then
+  --   objects.main_robot.body.body:applyForce(40, 10)
+  -- end
 end
 
 local function rectangle_points(window_width, window_height, x1, y1, x2, y2, x3, y3, x4, y4)
