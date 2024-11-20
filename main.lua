@@ -1,4 +1,5 @@
 local inspect = require('inspect')
+local colors = require('src.colors')
 
 function love.conf(t)
   t.title = "Sumo Bot Simulator"
@@ -17,35 +18,55 @@ function love.load()
   objects.main_robot.body.body = love.physics.newBody(world, .6, .6)
   objects.main_robot.body.shape = love.physics.newRectangleShape(.1, .1)
   objects.main_robot.body.fixture = love.physics.newFixture(objects.main_robot.body.body, objects.main_robot.body.shape)
+  objects.main_robot.body.color = colors.red
 
   objects.main_robot.left_white_line_sensor = {}
   objects.main_robot.left_white_line_sensor.body = love.physics.newBody(world, .56, .56)
   objects.main_robot.left_white_line_sensor.shape = love.physics.newCircleShape(.015)
   objects.main_robot.left_white_line_sensor.fixture = love.physics.newFixture(objects.main_robot.left_white_line_sensor.body, objects.main_robot.left_white_line_sensor.shape)
+  objects.main_robot.left_white_line_sensor.color = colors.orange
 
   objects.main_robot.right_white_line_sensor = {}
   objects.main_robot.right_white_line_sensor.body = love.physics.newBody(world, .64, .56)
   objects.main_robot.right_white_line_sensor.shape = love.physics.newCircleShape(.015)
   objects.main_robot.right_white_line_sensor.fixture = love.physics.newFixture(objects.main_robot.right_white_line_sensor.body, objects.main_robot.right_white_line_sensor.shape)
+  objects.main_robot.right_white_line_sensor.color = colors.yellow
 
-  objects.opp_robot_body = {}
-  objects.opp_robot_body.body = love.physics.newBody(world, .4, .4)
-  objects.opp_robot_body.shape = love.physics.newRectangleShape(.1, .1)
-  objects.opp_robot_body.fixture = love.physics.newFixture(objects.opp_robot_body.body, objects.opp_robot_body.shape)
+  objects.opp_robot = {}
+
+  objects.opp_robot.body = {}
+  objects.opp_robot.body.body = love.physics.newBody(world, .4, .4)
+  objects.opp_robot.body.shape = love.physics.newRectangleShape(.1, .1)
+  objects.opp_robot.body.fixture = love.physics.newFixture(objects.opp_robot.body.body, objects.opp_robot.body.shape)
+  objects.opp_robot.body.color = colors.brown
+
+  objects.opp_robot.left_white_line_sensor = {}
+  objects.opp_robot.left_white_line_sensor.body = love.physics.newBody(world, .44, .44)
+  objects.opp_robot.left_white_line_sensor.shape = love.physics.newCircleShape(.015)
+  objects.opp_robot.left_white_line_sensor.fixture = love.physics.newFixture(objects.opp_robot.left_white_line_sensor.body, objects.opp_robot.left_white_line_sensor.shape)
+  objects.opp_robot.left_white_line_sensor.color = colors.light_purple
+
+  objects.opp_robot.right_white_line_sensor = {}
+  objects.opp_robot.right_white_line_sensor.body = love.physics.newBody(world, .36, .44)
+  objects.opp_robot.right_white_line_sensor.shape = love.physics.newCircleShape(.015)
+  objects.opp_robot.right_white_line_sensor.fixture = love.physics.newFixture(objects.opp_robot.right_white_line_sensor.body, objects.opp_robot.right_white_line_sensor.shape)
+  objects.opp_robot.right_white_line_sensor.color = colors.pink
 
   objects.black_board = {}
   objects.black_board.body = love.physics.newBody(world, .5, .5)
   objects.black_board.shape = love.physics.newCircleShape(.85)
   objects.black_board.fixture = love.physics.newFixture(objects.black_board.body, objects.black_board.shape)
+  objects.black_board.color = colors.black
 
   objects.white_border = {}
   objects.white_border.body = love.physics.newBody(world, .5, .5)
   objects.white_border.shape = love.physics.newCircleShape(.95)
   objects.white_border.fixture = love.physics.newFixture(objects.white_border.body, objects.black_board.shape)
+  objects.white_border.color = colors.white
 
 
 
-  love.graphics.setBackgroundColor(.1, .3, .8)
+  love.graphics.setBackgroundColor(colors.blue())
   love.window.setMode(650, 650)
 end
 
@@ -63,28 +84,30 @@ local function circle_points(window_width, window_height, x, y, r)
   return x * w, y * w, r * w/2
 end
 
+local function draw_object(object)
+  love.graphics.setColor(object.color())
+
+  local shape_type = object.shape:type()
+  if shape_type == "CircleShape" then
+    love.graphics.circle("fill", circle_points(window_width, window_height, object.body:getX(),
+      object.body:getY(), object.shape:getRadius()))
+  elseif shape_type == "PolygonShape" then
+    love.graphics.polygon("fill", rectangle_points(window_width, window_height, object.body:getWorldPoints(object.shape:getPoints())))
+  end
+end
+
 function love.draw()
-  window_width, window_height = love.graphics.getDimensions( )
+  window_width, window_height = love.graphics.getDimensions()
 
-  love.graphics.setColor(1,1,1)
-  love.graphics.circle("fill", circle_points(window_width, window_height, objects.white_border.body:getX(),
-    objects.white_border.body:getY(), objects.white_border.shape:getRadius()))
+  draw_object(objects.white_border)
+  draw_object(objects.black_board)
 
-  love.graphics.setColor(0,0,0)
-  love.graphics.circle("fill", circle_points(window_width, window_height, objects.black_board.body:getX(),
-    objects.black_board.body:getY(), objects.black_board.shape:getRadius()))
+  draw_object(objects.main_robot.body)
+  draw_object(objects.main_robot.left_white_line_sensor)
+  draw_object(objects.main_robot.right_white_line_sensor)
 
-  love.graphics.setColor(.6,0,0)
-  love.graphics.polygon("fill", rectangle_points(window_width, window_height, objects.main_robot.body.body:getWorldPoints(objects.main_robot.body.shape:getPoints())))
+  draw_object(objects.opp_robot.body)
+  draw_object(objects.opp_robot.left_white_line_sensor)
+  draw_object(objects.opp_robot.right_white_line_sensor)
 
-  love.graphics.setColor(.3,.2,0)
-  love.graphics.polygon("fill", rectangle_points(window_width, window_height, objects.opp_robot_body.body:getWorldPoints(objects.opp_robot_body.shape:getPoints())))
-
-  love.graphics.setColor(1,1,1)
-  love.graphics.circle("fill", circle_points(window_width, window_height, objects.main_robot.left_white_line_sensor.body:getX(),
-    objects.main_robot.left_white_line_sensor.body:getY(), objects.main_robot.left_white_line_sensor.shape:getRadius()))
-
-  love.graphics.setColor(1,1,1)
-  love.graphics.circle("fill", circle_points(window_width, window_height, objects.main_robot.right_white_line_sensor.body:getX(),
-    objects.main_robot.right_white_line_sensor.body:getY(), objects.main_robot.right_white_line_sensor.shape:getRadius()))
 end
