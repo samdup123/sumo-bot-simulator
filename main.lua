@@ -21,7 +21,7 @@ function love.load()
   objects.main_robot.body.fixture = love.physics.newFixture(objects.main_robot.body.body, objects.main_robot.body.shape)
   objects.main_robot.body.fixture:setRestitution(0.9)
   objects.main_robot.body.fixture:setCategory(object_category.robot)
-  objects.main_robot.body.fixture:setMask(object_category.world, object_category.robot)
+  objects.main_robot.body.fixture:setMask(object_category.robot)
   objects.main_robot.body.color = colors.red
 
   objects.main_robot.left_white_line_sensor = {}
@@ -30,7 +30,7 @@ function love.load()
   objects.main_robot.left_white_line_sensor.fixture = love.physics.newFixture(objects.main_robot.left_white_line_sensor.body, objects.main_robot.left_white_line_sensor.shape)
   objects.main_robot.left_white_line_sensor.fixture:setRestitution(0.9)
   objects.main_robot.left_white_line_sensor.fixture:setCategory(object_category.robot)
-  objects.main_robot.left_white_line_sensor.fixture:setMask(object_category.world, object_category.robot)
+  objects.main_robot.left_white_line_sensor.fixture:setMask(object_category.robot)
   objects.main_robot.left_white_line_sensor.color = colors.orange
   objects.main_robot.left_white_line_sensor_joint = love.physics.newDistanceJoint(objects.main_robot.body.body, objects.main_robot.left_white_line_sensor.body, .56, .56, .56, .56)
 
@@ -40,7 +40,7 @@ function love.load()
   objects.main_robot.right_white_line_sensor.fixture = love.physics.newFixture(objects.main_robot.right_white_line_sensor.body, objects.main_robot.right_white_line_sensor.shape)
   objects.main_robot.right_white_line_sensor.fixture:setRestitution(0.9)
   objects.main_robot.right_white_line_sensor.fixture:setCategory(object_category.robot)
-  objects.main_robot.right_white_line_sensor.fixture:setMask(object_category.world, object_category.robot)
+  objects.main_robot.right_white_line_sensor.fixture:setMask(object_category.robot)
   objects.main_robot.right_white_line_sensor.color = colors.yellow
   objects.main_robot.right_white_line_sensor_joint = love.physics.newDistanceJoint(objects.main_robot.body.body, objects.main_robot.right_white_line_sensor.body, .64, .56, .64, .56)
 
@@ -67,19 +67,15 @@ function love.load()
   objects.opp_robot.right_white_line_sensor_joint = love.physics.newDistanceJoint(objects.opp_robot.body.body, objects.opp_robot.right_white_line_sensor.body, .36, .44, .36, .44)
 
   objects.black_board = {}
-  objects.black_board.body = love.physics.newBody(world, .5, .5)
+  objects.black_board.x = .5
+  objects.black_board.y = .5
   objects.black_board.shape = love.physics.newCircleShape(.85)
-  objects.black_board.fixture = love.physics.newFixture(objects.black_board.body, objects.black_board.shape)
-  objects.black_board.fixture:setCategory(object_category.world)
-  objects.black_board.fixture:setMask(object_category.world, object_category.robot)
   objects.black_board.color = colors.black
 
   objects.white_border = {}
-  objects.white_border.body = love.physics.newBody(world, .5, .5)
+  objects.white_border.x = .5
+  objects.white_border.y = .5
   objects.white_border.shape = love.physics.newCircleShape(.95)
-  objects.white_border.fixture = love.physics.newFixture(objects.white_border.body, objects.black_board.shape)
-  objects.white_border.fixture:setCategory(object_category.world)
-  objects.white_border.fixture:setMask(object_category.world, object_category.robot)
   objects.white_border.color = colors.white
 
   objects.walls = {}
@@ -118,10 +114,6 @@ end
 
 function love.update(dt)
   world:update(dt)
-
-  if love.keyboard.isDown("right") then
-    objects.main_robot.body.body:applyForce(1, 0)
-  end
 end
 
 local function rectangle_points(window_width, window_height, x1, y1, x2, y2, x3, y3, x4, y4)
@@ -139,8 +131,13 @@ local function draw_object(object)
 
   local shape_type = object.shape:type()
   if shape_type == "CircleShape" then
-    love.graphics.circle("fill", circle_points(window_width, window_height, object.body:getX(),
-      object.body:getY(), object.shape:getRadius()))
+    if object.body then
+      love.graphics.circle("fill", circle_points(window_width, window_height, object.body:getX(),
+        object.body:getY(), object.shape:getRadius()))
+    else
+      love.graphics.circle("fill", circle_points(window_width, window_height, object.x,
+        object.y, object.shape:getRadius()))
+    end
   elseif shape_type == "PolygonShape" then
     love.graphics.polygon("fill", rectangle_points(window_width, window_height, object.body:getWorldPoints(object.shape:getPoints())))
   end
